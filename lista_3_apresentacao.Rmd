@@ -11,21 +11,18 @@ output: powerpoint_presentation
 
 # Lendo o conjunto de dados no R
  - Obs: esta lista foi criada como um projeto que, como pode-se ver no local do arquivo, estará disponível no GitHub
- 
+
+
 ```{r}
 library(readr)
 library(readxl)
 library(tidyverse)
 
 state_constitutions_word_count <- read_excel("state_constitutions_word_count.xlsx")
-
 ```
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-```
 
-#Informações trazidas pela base de dados
+# Informações trazidas pela base de dados
  - As antigas Constituições, não-vigentes, são indicadaspelo número 0 da coluna "current_constitution".
  - As Constituições vigentes em cada Estado são indicada pelo número 1 da coluna "current_constitution".
  - Cada variável informa o número de palavras daquele grupo naquela constituição.
@@ -90,7 +87,7 @@ state_constitutions_word_count %>% select(constitution_year) %>% head(1) #acessa
 state_constitutions_word_count %>% select(constitution_year) %>% tail(1)
 #acessando a data mais recenteas constituições R: 2017
 ```
-#Gráfico 1
+# Gráfico 1
 ## Justificando a escolha do gráfico 1
 - Optou-se por utilizar o tipo de gráfico "Line Histogram" pelos seguintes motivos: 
   ** O objetivo é observar a distribuição das constituições ao longo do tempo 
@@ -115,16 +112,18 @@ grafico1 <- state_constitutions_word_count %>% ggplot(aes(x=constitution_year)) 
   labs(title = "Promulgação de constituições ao longo do tempo",
        x = "Ano de promulgação",
        y = "densidade") #nomeando os eixos
-                                      
+
+grafico1                                      
 ```
 
-#Gráfico 2
+# Gráfico 2
+
 ## Justificando a escolha do gráfico 2
 - Optou-se por utilizar o tipo de gráfico de pontos (scatter chart) pelos seguintes motivos: 
   ** O objetivo é observar a distribuição do número de palavras nas constituições de cada estado 
   ** Temos duas variáveis em foco - total_word e state - para evidenciar a distribuição de palavras nas constituições dos Estados
   
-## Manipulando os dados para o gráfico 2
+# Manipulando os dados para o gráfico 2
 - Ordenando a partir da ordem crescente de palavras para facilitar uma visualização linear no gráfico
 
 ```{r}
@@ -132,14 +131,14 @@ state_constitutions_word_count <- state_constitutions_word_count %>% arrange(tot
 ```
 
 
-## Comentando os códigos do gráfico 2
+# Comentando os códigos do gráfico 2
 - O gráfico terá as seguintes características:
 1. Gemoetria de pontos - para identificar o número de palavras em cada constituição a partir dos Estados. geom_point()
 1. Estética:
  1.1 O eixo x será composto pelas abreviações dos nomes dos estados 
  1.1 O eixo y indicará o total de palavras na constituição daquele Estado. Optou-se por essa dinâmica para possibilitar que a variação entre o número de palavras nas constituições seja comunicado
 1. Tema classic - fundo branco e sem grades para facilitar a visualização
-1. Cor de contorno será preta
+1. Cor de contorno será vermelha
 
 # Gráfico 2
 ```{r}
