@@ -1,0 +1,154 @@
+---
+title: "Lista 3 - Métodos Quantitativos"
+author: "Isabel Eirado"
+date: "19/11/2020"
+output: powerpoint_presentation
+---
+
+# O conjunto de dados 
+ - Aborda constituições norte-americanas
+ - Traz informações sobre as Constituições de cada Estado da Federação dos Estados Unidos, informando as datas desde a primeira até a vigente
+
+# Lendo o conjunto de dados no R
+ - Obs: esta lista foi criada como um projeto que, como pode-se ver no local do arquivo, estará disponível no GitHub
+ 
+```{r}
+library(readr)
+library(readxl)
+library(tidyverse)
+
+state_constitutions_word_count <- read_excel("state_constitutions_word_count.xlsx")
+
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+#Informações trazidas pela base de dados
+ - As antigas Constituições, não-vigentes, são indicadaspelo número 0 da coluna "current_constitution".
+ - As Constituições vigentes em cada Estado são indicada pelo número 1 da coluna "current_constitution".
+ - Cada variável informa o número de palavras daquele grupo naquela constituição.
+  * Exemplo: a variável "discrimination" informa quantas palavras associadas à discriminação foram encontradas na Constituição a qual aquela observação se refere.
+ - Uso a função glimpse para dar um panorama geral da base de dados, trazendo informações sobre o número de linhas, colunas, as variáveis e seus tipos.
+ 
+# Glimpse na base de dados
+
+```{r echo=TRUE}
+glimpse (state_constitutions_word_count)
+```
+# Objetivo deste trabalho
+- Neste trabalho objetivo analisar as constituições atuais a partir do total de palavras e dos anos em que foram promulgadas. Para isso irei selecionar as colunas de interesse usando o pacote dplyr. 
+- Após selecionar as variáveis de interesse irei filtrar apenas as Constituições vigentes.
+
+# Selecionando as variáveis de interesse 
+
+- A partir do banco de dados, objetivo criar gráfico dois gráficos:
+1. Gráfico 1 - gráfico que evidencie a variação das datas de promulgação das constituições estaduais
+2. Gráfico 2 - gráfico que  ajude a identificar a variação do número de palavras das constituições vigentes em cada Estado. 
+
+- Para isso seleciono apenas as variáveis de interesse: nome do estado, ano da constituição, constituição atual e total de palavras
+- Filtro apenas as constituições vigentes 
+
+# Selecionando as variáveis de interesse 
+
+
+```{r}
+state_constitutions_word_count <- state_constitutions_word_count %>% select(state, constitution_year, current_constitution, total_words) %>% #selecionando as variaveis de interesse - nome do estado, ano da constituição, constituição atual e total de palavras
+  filter(current_constitution == 1) #filtrando apenas as constituições vigentes
+
+```
+
+# Visualizando a base de dados após manipulação
+
+```{r echo=TRUE}
+View(state_constitutions_word_count)
+```
+
+# Preparando os dados para os gráficos
+- Criarei uma nova coluna (abv_state) a partir da base de dados (states_and_abbreviations) para usar as abreviação dos nomes dos estados e assim facilitar a visualização dos dados no gráfico. 
+
+```{r}
+
+state_abrev <- read_excel("states_and_abbreviations.xlsx") #chamando a base de dados para colocar as abreviações 
+
+state_constitutions_word_count <- state_constitutions_word_count %>% arrange(state) #ordenando por nome do Estado a primeira bases de dados para poder juntar
+
+state_constitutions_word_count <- state_constitutions_word_count %>% left_join(state_abrev, by = "state")#juntando as bases de dados a partir da coluna "states"
+
+state_constitutions_word_count <- state_constitutions_word_count %>% rename (abv_state=abbreviation) #renomeando o nome da variável que indica a abreviação dos nomes dos estados
+```
+
+# Preparando os dados para gráfico
+- Calculando os valores máximos e mínimos das datas a partir de ordem crescente
+
+```{r}
+state_constitutions_word_count <- state_constitutions_word_count %>% arrange(constitution_year) #ordenando em ordem crescente da mais antiga à mais nova constituição
+
+state_constitutions_word_count %>% select(constitution_year) %>% head(1) #acessando a data mais antiga das constituições  R: 2004
+
+state_constitutions_word_count %>% select(constitution_year) %>% tail(1)
+#acessando a data mais recenteas constituições R: 2017
+```
+#Gráfico 1
+## Justificando a escolha do gráfico 1
+- Optou-se por utilizar o tipo de gráfico "Line Histogram" pelos seguintes motivos: 
+  ** O objetivo é observar a distribuição das constituições ao longo do tempo 
+  ** O ano da constituição vigente (constitution_year) é a variável em foco, variável única
+  ** Como os Estados Unidos têm muitos estados, totalizando 50, existem muitos "data points" e por isso optou-se pelo histograma em linha, para evidenciar o pico da promulgação de constituições.
+
+## Comentando os códigos do gráfico 1
+- O gráfico terá as seguintes características:
+1. Gemoetria de densidade - para identificar quantas constituições foram promulgadas em cada ano e conseguir visualizar bem a distribuição ao longo do tempo. geom_density()
+1. Estética:
+ 1.1 O eixo x será composto pelas datas para que as alterações possam ser bem visualizadas: x=constitution_year
+ 1.1 O eixo y indicará a densidade
+1. Tema classic - fundo branco e sem grades para facilitar a visualização
+1. Cor de contorno será preta
+
+# Gráfico 1
+
+```{r}
+grafico1 <- state_constitutions_word_count %>% ggplot(aes(x=constitution_year)) +# estabelecendo o eixo x - univa variavel que será ano
+  geom_density(color="black", size=1)+ #definindo a cor e o tamanho da linha 
+  theme_classic() +  #estabelecendo o tema do gráfico
+  labs(title = "Promulgação de constituições ao longo do tempo",
+       x = "Ano de promulgação",
+       y = "densidade") #nomeando os eixos
+                                      
+```
+
+#Gráfico 2
+## Justificando a escolha do gráfico 2
+- Optou-se por utilizar o tipo de gráfico de pontos (scatter chart) pelos seguintes motivos: 
+  ** O objetivo é observar a distribuição do número de palavras nas constituições de cada estado 
+  ** Temos duas variáveis em foco - total_word e state - para evidenciar a distribuição de palavras nas constituições dos Estados
+  
+## Manipulando os dados para o gráfico 2
+- Ordenando a partir da ordem crescente de palavras para facilitar uma visualização linear no gráfico
+
+```{r}
+state_constitutions_word_count <- state_constitutions_word_count %>% arrange(total_words)
+```
+
+
+## Comentando os códigos do gráfico 2
+- O gráfico terá as seguintes características:
+1. Gemoetria de pontos - para identificar o número de palavras em cada constituição a partir dos Estados. geom_point()
+1. Estética:
+ 1.1 O eixo x será composto pelas abreviações dos nomes dos estados 
+ 1.1 O eixo y indicará o total de palavras na constituição daquele Estado. Optou-se por essa dinâmica para possibilitar que a variação entre o número de palavras nas constituições seja comunicado
+1. Tema classic - fundo branco e sem grades para facilitar a visualização
+1. Cor de contorno será preta
+
+# Gráfico 2
+```{r}
+grafico2 <- ggplot(state_constitutions_word_count, aes(x=abv_state, y=total_words)) + #definindo os dados a serem projetados nos eixos x e y
+  geom_point(color="red", size=1, fill="red") + #definindo a geometria scatter com cor de contorno e preenchimento vermelhas e o tamanho do preenchimento
+  theme_classic() +  #definindo o tema classico
+  labs(title = "Palavras nas constituições por estado", x = "estado",
+       y = "número de palavras") #nomeando o gráfico e os eixos
+
+grafico2
+```
+
