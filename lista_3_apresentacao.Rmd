@@ -113,7 +113,7 @@ grafico1 <- state_constitutions_word_count %>% ggplot(aes(x=constitution_year)) 
        x = "Ano de promulgação",
        y = "densidade") #nomeando os eixos
 
-grafico1                                      
+grafico1                                    
 ```
 
 # Gráfico 2
@@ -143,10 +143,11 @@ state_constitutions_word_count <- state_constitutions_word_count %>% arrange(tot
 # Gráfico 2
 ```{r}
 grafico2 <- ggplot(state_constitutions_word_count, aes(x=abv_state, y=total_words)) + #definindo os dados a serem projetados nos eixos x e y
-  geom_point(color="red", size=1, fill="red") + #definindo a geometria scatter com cor de contorno e preenchimento vermelhas e o tamanho do preenchimento
-  theme_classic() +  #definindo o tema classico
-  labs(title = "Palavras nas constituições por estado", x = "estado",
-       y = "número de palavras") #nomeando o gráfico e os eixos
+  geom_point(color="red", size=1, fill="red") +#definindo a geometria scatter com cor de contorno e preenchimento vermelhas e o tamanho do preenchimento
+           scale_y_continuous(breaks = c(5000, 30000, 60000, 80000, 10000, 340000)) + #definindo os valores a serem mostrados no gráfico no eixo y
+ theme_classic() +  #definindo o tema classico
+  theme(axis.text.x = element_text(angle=90, hjust=1)) #definindo a posição vertical para o eixo x
+     
 
 grafico2
 ```
